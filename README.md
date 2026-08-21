@@ -1,128 +1,169 @@
 # WPA Incidencias
 
-Sistema de gestión y seguimiento de incidencias orientado a entornos corporativos.
+Aplicación web para la gestión y seguimiento de incidencias en entornos corporativos.
 
-> **Portfolio DevSecOps / Platform Engineering** — este repositorio está preparado para evolucionar desde el desarrollo local hacia una plataforma automatizada con CI/CD, seguridad integrada, observabilidad e infraestructura como código.
+> **Portfolio DevSecOps / Platform Engineering** — el proyecto parte de una SPA React y evoluciona progresivamente hacia una plataforma con API, persistencia, CI/CD, seguridad, observabilidad y despliegue cloud-native.
 
-## 🎯 Objetivos
+## 🧱 Stack actual
 
-- Gestionar el ciclo de vida de las incidencias.
-- Facilitar la trazabilidad de estados, responsables y prioridades.
-- Automatizar validaciones mediante CI/CD.
-- Integrar controles de seguridad desde el desarrollo.
-- Preparar el despliegue reproducible mediante infraestructura como código.
-- Evolucionar hacia una arquitectura cloud-native cuando el proyecto lo requiera.
+- React 19
+- Vite 8
+- React Router 7
+- Axios
+- Lucide React
+- Oxlint
+- Persistencia local temporal mediante `localStorage`
 
-## 🏗️ Arquitectura de referencia
+## ✅ MVP actual
+
+- Dashboard con métricas de incidencias.
+- Listado de incidencias.
+- Búsqueda por título y responsable.
+- Filtro por estado.
+- Creación de nuevas incidencias.
+- Prioridad y responsable.
+- Cambio de estado: **Abierta → En progreso → Resuelta → Cerrada**.
+- Persistencia local para desarrollo del MVP.
+
+## 🏗️ Arquitectura objetivo
 
 ```text
-┌──────────────────────┐
-│     Usuario / IT     │
-└──────────┬───────────┘
-           │ HTTPS
-           ▼
-┌──────────────────────┐
-│     Aplicación WPA   │
-│      Incidencias     │
-└──────────┬───────────┘
-           │
-     ┌─────┴─────┐
-     ▼           ▼
-┌──────────┐ ┌────────────┐
-│ Database │ │ Integrations│
-└──────────┘ └────────────┘
+                           WPA INCIDENCIAS
 
-              CI/CD
-                │
-                ▼
-┌─────────────────────────────────────┐
-│ GitHub → Build → Test → Security   │
-│        → Package → Deploy          │
-└─────────────────────────────────────┘
-                │
-                ▼
-       Cloud / Kubernetes
+┌──────────────┐      HTTPS      ┌─────────────────┐
+│    Usuario   │ ──────────────► │ React + Vite    │
+└──────────────┘                 │    Frontend     │
+                                 └────────┬────────┘
+                                          │ REST API
+                                          ▼
+                                 ┌─────────────────┐
+                                 │ Backend / API   │
+                                 │    FastAPI      │
+                                 └────────┬────────┘
+                                          │
+                                          ▼
+                                 ┌─────────────────┐
+                                 │   PostgreSQL    │
+                                 └─────────────────┘
+
+             CI/CD + DevSecOps + Observability + GitOps
 ```
 
-Consulta la [arquitectura detallada](docs/architecture.md).
+La arquitectura se detalla en [`docs/architecture.md`](docs/architecture.md).
 
 ## 🔄 CI/CD
 
-El repositorio incorpora una base de GitHub Actions para automatizar:
+GitHub Actions valida actualmente el frontend mediante:
 
-1. Validación del código.
-2. Detección de errores de whitespace y problemas básicos del repositorio.
-3. Controles de seguridad.
-4. Preparación para añadir build, tests, empaquetado y despliegue según el stack definitivo.
+1. Instalación reproducible con `npm ci`.
+2. Lint con Oxlint.
+3. Build de producción con Vite.
+4. Validación de whitespace del repositorio.
 
-Los workflows están en `.github/workflows/`.
+Los workflows están en [`.github/workflows/`](.github/workflows/).
 
 ## 🔐 DevSecOps
 
-La estrategia propuesta integra seguridad en todo el ciclo:
-
-```text
-Plan → Code → Build → Test → Security → Release → Deploy → Operate
-          │            │        │                         │
-          └────────────┴────────┴─────────────────────────┘
-                         Feedback
-```
-
-Controles recomendados:
+La evolución prevista incorpora:
 
 - Secret scanning.
-- Dependencias y vulnerabilidades.
+- Dependency review y análisis de vulnerabilidades.
 - SAST.
-- Análisis de contenedores si se utiliza Docker.
-- IaC scanning si se incorpora Terraform/Ansible.
+- Análisis de imágenes Docker con Trivy.
+- SBOM.
+- IaC scanning.
 - Mínimo privilegio en GitHub Actions.
-- Protección de ramas y revisiones obligatorias.
+- Protección de ramas y revisiones mediante Pull Requests.
 
-Consulta [`SECURITY.md`](SECURITY.md) para la política del proyecto.
+Consulta [`SECURITY.md`](SECURITY.md).
 
-## 📁 Estructura prevista
+## 📁 Estructura
 
 ```text
 wpa-incidencias/
-├── .github/
-│   └── workflows/
-├── docs/
-│   └── architecture.md
-├── src/                 # Código de aplicación
-├── tests/               # Tests automatizados
+├── .github/workflows/     # CI/CD y seguridad
+├── docs/                  # Arquitectura y decisiones
+├── public/                # Recursos públicos
+├── src/
+│   ├── components/        # Componentes reutilizables
+│   ├── context/           # Estado transversal
+│   ├── data/              # Datos de aplicación
+│   ├── hooks/             # Hooks reutilizables
+│   ├── mock/              # Datos mock
+│   ├── pages/             # Vistas
+│   ├── routes/            # Routing
+│   └── services/          # Acceso a datos/API
 ├── README.md
-└── SECURITY.md
+├── SECURITY.md
+├── package.json
+└── vite.config.js
 ```
 
-La estructura `src/` y `tests/` puede adaptarse al lenguaje/framework utilizado por el proyecto.
-
 ## 🚀 Desarrollo local
-
-La forma exacta de ejecutar la aplicación dependerá del stack definitivo. Como principio, el flujo recomendado es:
 
 ```bash
 git clone https://github.com/fmartinezaltolaguirre/wpa-incidencias.git
 cd wpa-incidencias
+npm ci
+npm run dev
+```
 
-# Instalar dependencias según el stack
-# Ejecutar tests
-# Arrancar la aplicación
+Para validar producción:
+
+```bash
+npm run lint
+npm run build
+npm run preview
 ```
 
 ## 🧭 Roadmap
 
-- [x] Crear repositorio.
-- [x] Documentar arquitectura de referencia.
-- [x] Incorporar baseline CI/CD.
-- [x] Incorporar baseline DevSecOps.
-- [ ] Integrar el código de aplicación.
-- [ ] Añadir tests automatizados.
-- [ ] Añadir Dockerfile.
-- [ ] Añadir pipeline de build y publicación de imagen.
-- [ ] Añadir IaC.
-- [ ] Despliegue en Kubernetes.
-- [ ] GitOps con Argo CD.
-- [ ] Observabilidad y métricas.
+### M1 — MVP funcional
+
+- [x] Dashboard.
+- [x] Listado y búsqueda de incidencias.
+- [x] Creación de incidencias.
+- [x] Workflow de estados.
+- [x] Persistencia local para MVP.
+
+### M2 — Backend y persistencia
+
+- [ ] API REST con FastAPI.
+- [ ] PostgreSQL.
+- [ ] Modelo de dominio y migraciones.
+- [ ] Validación de datos.
+- [ ] Auditoría de cambios.
+
+### M3 — Identidad y seguridad
+
+- [ ] Autenticación.
+- [ ] RBAC.
+- [ ] Integración preparada para Microsoft Entra ID.
+- [ ] Gestión de secretos.
+
+### M4 — DevSecOps
+
+- [x] CI de lint y build.
+- [x] Baseline de seguridad.
+- [ ] Tests unitarios e integración.
+- [ ] Docker.
+- [ ] SAST y dependency scanning.
+- [ ] SBOM y análisis de imagen.
+
+### M5 — Cloud Native
+
+- [ ] Kubernetes.
+- [ ] Helm.
+- [ ] Terraform.
+- [ ] Argo CD / GitOps.
+- [ ] Observabilidad con OpenTelemetry, Prometheus y Grafana.
+
+### M6 — AI Incident Assistant
+
+- [ ] Clasificación automática.
+- [ ] Sugerencia de prioridad.
+- [ ] Detección de incidencias similares.
+- [ ] Asistente de diagnóstico y resolución.
 
 ## 👤 Autor
 
