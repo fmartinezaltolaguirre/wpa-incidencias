@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getIncidencias } from "../services/incidenciasService";
+import { getIncidencias, updateIncidencia } from "../services/incidenciasService";
+
+const estados = ["Abierta", "En progreso", "Resuelta", "Cerrada"];
 
 const estadoStyles = {
   Abierta: { background: "#fee2e2", color: "#991b1b" },
@@ -40,6 +42,11 @@ export default function Incidencias() {
       return coincideEstado && coincideTexto;
     });
   }, [incidencias, filtroEstado, busqueda]);
+
+  const cambiarEstado = (id, estado) => {
+    updateIncidencia(id, { estado });
+    setIncidencias(getIncidencias());
+  };
 
   return (
     <section>
@@ -111,10 +118,9 @@ export default function Incidencias() {
           }}
         >
           <option>Todas</option>
-          <option>Abierta</option>
-          <option>En progreso</option>
-          <option>Resuelta</option>
-          <option>Cerrada</option>
+          {estados.map((estado) => (
+            <option key={estado}>{estado}</option>
+          ))}
         </select>
       </div>
 
@@ -149,22 +155,39 @@ export default function Incidencias() {
                       #{incidencia.id}
                     </td>
                     <td style={{ padding: "14px 16px", fontWeight: 600 }}>
-                      {incidencia.titulo}
+                      <div>{incidencia.titulo}</div>
+                      {incidencia.descripcion && (
+                        <small style={{ color: "#64748b", fontWeight: 400 }}>
+                          {incidencia.descripcion}
+                        </small>
+                      )}
                     </td>
                     <td style={{ padding: "14px 16px" }}>
-                      <span
+                      <select
+                        value={incidencia.estado}
+                        onChange={(event) => cambiarEstado(incidencia.id, event.target.value)}
+                        aria-label={`Estado de ${incidencia.titulo}`}
                         style={{
                           ...estadoStyles[incidencia.estado],
-                          padding: "5px 9px",
+                          border: 0,
+                          padding: "6px 9px",
                           borderRadius: "999px",
                           fontSize: "13px",
                           fontWeight: 600,
                         }}
                       >
-                        {incidencia.estado}
-                      </span>
+                        {estados.map((estado) => (
+                          <option key={estado}>{estado}</option>
+                        ))}
+                      </select>
                     </td>
-                    <td style={{ padding: "14px 16px", fontWeight: 600, color: prioridadStyles[incidencia.prioridad] || "#475569" }}>
+                    <td
+                      style={{
+                        padding: "14px 16px",
+                        fontWeight: 600,
+                        color: prioridadStyles[incidencia.prioridad] || "#475569",
+                      }}
+                    >
                       {incidencia.prioridad}
                     </td>
                     <td style={{ padding: "14px 16px" }}>
