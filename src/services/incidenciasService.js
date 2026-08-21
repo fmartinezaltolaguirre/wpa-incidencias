@@ -4,6 +4,7 @@ const datosIniciales = [
   {
     id: 1,
     titulo: "Error VPN",
+    descripcion: "Usuarios sin acceso a la VPN corporativa.",
     estado: "Abierta",
     prioridad: "Alta",
     responsable: "Fernando",
@@ -11,6 +12,7 @@ const datosIniciales = [
   {
     id: 2,
     titulo: "Acceso a aplicación corporativa",
+    descripcion: "Un usuario no puede autenticarse en la aplicación.",
     estado: "En progreso",
     prioridad: "Media",
     responsable: "Soporte IT",
@@ -18,6 +20,7 @@ const datosIniciales = [
   {
     id: 3,
     titulo: "Renovación de certificado",
+    descripcion: "Certificado próximo a caducar en producción.",
     estado: "Resuelta",
     prioridad: "Crítica",
     responsable: "Infraestructura",
@@ -45,16 +48,24 @@ export const getIncidencias = () => {
 };
 
 export const addIncidencia = (incidencia) => {
-  const incidencias = getIncidencias();
   const nuevaIncidencia = {
     ...incidencia,
     id: Date.now(),
   };
 
-  const resultado = [...incidencias, nuevaIncidencia];
+  const resultado = [...getIncidencias(), nuevaIncidencia];
   localStorage.setItem(STORAGE_KEY, JSON.stringify(resultado));
 
   return nuevaIncidencia;
+};
+
+export const updateIncidencia = (id, cambios) => {
+  const resultado = getIncidencias().map((incidencia) =>
+    incidencia.id === id ? { ...incidencia, ...cambios } : incidencia,
+  );
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(resultado));
+  return resultado.find((incidencia) => incidencia.id === id) ?? null;
 };
 
 export const clearIncidencias = () => {
