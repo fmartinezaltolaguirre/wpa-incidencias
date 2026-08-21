@@ -10,24 +10,28 @@ permissions:
   contents: read
 
 jobs:
-  repository-quality:
-    name: Repository quality
+  frontend:
+    name: Lint and build frontend
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
       - name: Validate Git whitespace
         run: git diff-tree --check --no-commit-id --root -r HEAD
-
-      - name: Show repository structure
-        run: |
-          echo "Repository: $GITHUB_REPOSITORY"
-          echo "Ref: $GITHUB_REF"
-          echo "Commit: $GITHUB_SHA"
-
-      # TODO: add application-specific steps when the local project is pushed:
-      # - install dependencies
-      # - lint
-      # - unit/integration tests
-      # - build/package
